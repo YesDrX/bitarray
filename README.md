@@ -17,22 +17,26 @@ nimble install bitarray
 
 # Example
 ```nim
+import bitarray
 when isMainModule:
   var
-    a = newBitsArray(9000000)
-    b = newBitsArray(9000000)
+    a = newBitsArray(10)
+    b = newBitsArray(10)
   
-  echo a.sum
-  a.setAll
-  echo a.sum
-  echo a.blocks
-  echo (a | b).sum()
-  echo (a ^ b).sum()
+  echo a
+  echo b
+  a.setBits(0,1,2)
+  b.setAll
+  echo a & b
+  echo a | b
+  echo a ^ b
+  echo ~a
 ```
 ```
-0
-9000000
-140625
-9000000
-9000000
+0000000000
+0000000000
+1110000000
+1111111111
+0001111111
+0001111111
 ```

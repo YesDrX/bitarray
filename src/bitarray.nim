@@ -254,7 +254,7 @@ proc `shl`*(a: BitsArray, steps: SomeInteger): BitsArray=
     block_idx: int
     left_shifted: BlockInt = 0.BlockInt
 
-  for i in 0 ..< blocks_to_keep:
+  for i in countdown(blocks_to_keep-1,0):
     block_idx = i + blocks_to_abandon
     result.bits[i] = a.bits[block_idx].shr(shifts_in_block)
     if i > 0:
@@ -277,12 +277,12 @@ proc `shr`*(a: BitsArray, steps: SomeInteger): BitsArray=
     shifts_in_block = steps mod BLOCK_LEN
     block_idx: int
     right_shifted: BlockInt = 0.BlockInt
-
+  
   for i in 0 ..< blocks_to_keep:
     block_idx = a.blocks - (i + blocks_to_abandon) - 1
-    result.bits[a.blocks - block_idx - 1] = a.bits[block_idx].shl(shifts_in_block)
+    result.bits[a.blocks - i - 1] = a.bits[block_idx].shl(shifts_in_block)
     if i > 0:
-      result.bits[a.blocks - block_idx - 1] = result.bits[a.blocks - block_idx - 1].bitor(right_shifted)
+      result.bits[a.blocks - i - 1] = result.bits[a.blocks - i - 1].bitor(right_shifted)
     right_shifted = a.bits[block_idx].bitand(BLOCK_TAILS_BITS[shifts_in_block])
 
 proc firstSetBit*(a: BitsArray): int=
@@ -326,15 +326,21 @@ when isMainModule:
   var
     a = newBitsArray(70)
     b = newBitsArray(70)
-    c = newBitsArray(70)
   
   echo a
-  a.setBits(69)
+  a.setBits(0,1,2,3,4,69)
   echo a
-  echo a.countTrailingZeroBits
-  b = a.shl(69)
-  echo b
-  echo b.countTrailingZeroBits
-  c = b.shr(69)
-  echo c
-  echo c.countTrailingZeroBits
+  # b.setAll
+  # echo a & b
+  # echo a | b
+  # echo a ^ b
+  # echo ~a
+  # echo a.nbytes
+  echo a.shl(1)
+  echo a.shl(2)
+  echo a.shl(3)
+  echo a.shl(69)
+  echo a.shr(1)
+  echo a.shr(2)
+  echo a.shr(3)
+  echo a.shr(69)

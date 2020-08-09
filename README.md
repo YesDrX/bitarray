@@ -12,7 +12,7 @@ nimble install
 ```
 or
 ```
-nimble install bitarray
+nimble install nim-bitarray
 ```
 
 # Example

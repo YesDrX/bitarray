@@ -1,7 +1,7 @@
 import bitops
 import strutils
-import bitarray_utils
-export bitops, strutils, bitarray_utils
+import bitarray/utils
+export bitops, strutils, utils
 
 ## BitsArray Type
 ##     bits is a sequence of BlockInt (uint64/uint32/uint16/uint8, depending on CPU)

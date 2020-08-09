@@ -15,6 +15,8 @@ or
 nimble install nim-bitarray
 ```
 
+# [Documentation](https://yesdrx.github.io/bitarray/)
+
 # Example
 ```nim
 import bitarray

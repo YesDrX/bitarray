@@ -18,6 +18,8 @@ export bitops, strutils, utils
 ## 
 ## You may change the underlying BlockInt definition (in utils) to force define BlockInt to a different len, say 16-bits on a 64-bits CPU.
 ## 
+## NOTE: Bits are left aligned, so least significant bit is at location 0. So 10000110 is equal to 127 ('a'), rather than 134.
+## 
 type
   BitsArray* = ref object
     bits*: seq[BlockInt]
@@ -58,6 +60,7 @@ proc get_bit_position*(loc: int): (int, int)=
 
 proc setBit*(bit_arr: BitsArray, loc: int) =
   ## Set bit value at location loc to be 1.
+  ## 
   ## With macros from bitops, you may use setBits to set multiple bits.
   ## 
   var
@@ -66,6 +69,7 @@ proc setBit*(bit_arr: BitsArray, loc: int) =
 
 proc clearBit*(bit_arr: BitsArray, loc: int) =
   ## Set bit value at location loc to be 0.
+  ## 
   ## With macros from bitops, you may use setBits to clear multiple bits.
   ## 
   var
@@ -74,6 +78,7 @@ proc clearBit*(bit_arr: BitsArray, loc: int) =
 
 proc flipBit*(bit_arr: BitsArray, loc: int) =
   ## Flip bit value at location loc.
+  ## 
   ## With macros from bitops, you may use setBits to flip multiple bits.
   ## 
   var
@@ -98,6 +103,7 @@ proc countSetBits*(bit_arr: BitsArray): int =
 
 proc `&`*(a, b: BitsArray): BitsArray =
   ## Computes the bitwise and of a and b.
+  ## 
   assert( a.len == b.len)
 
   result = newBitsArray(a.len)
@@ -129,6 +135,7 @@ proc `^`*(a,b : BitsArray): BitsArray =
 
 proc `[]`*(a: BitsArray, loc: int): bool=
   ## Test bit value at loc.
+  ## 
   result = a.testBit(loc)
 
 proc `[]`*(a: BitsArray, locs: openArray[int]): BitsArray=

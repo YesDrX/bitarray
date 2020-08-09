@@ -8,9 +8,7 @@ export bitops, strutils, utils
 ## 
 ##     len is the number of bits
 ## 
-## BitsArray is saved in BlockInt blocks
-## 
-## For example, on a 64-bit machine, memory layout of BitsArray.bits is
+## BitsArray is saved in BlockInt blocks. For example, on a 64-bit machine, memory layout of BitsArray.bits is
 ## 
 ## 
 ## |<---64 bits--->|<---64 bits--->|<---64 bits--->|...|<---64 bits--->|
@@ -20,7 +18,7 @@ export bitops, strutils, utils
 ## 
 ## You may change the underlying BlockInt definition (in utils) to force define BlockInt to a different len, say 16-bits on a 64-bits CPU.
 ## 
-## NOTE: Bits are left aligned, so least significant bit is at location 0. So 10000110 is equal to 127 ('a'), rather than 134. Use proc reverseBits when necessary.
+## NOTE: Bits are left aligned, so least significant bit is at location 0. As a result, 10000110 is equal to 127 ('a'), rather than 134. Use proc reverseBits when necessary.
 ## 
 ## 
 type

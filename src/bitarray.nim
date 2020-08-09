@@ -322,25 +322,43 @@ proc countTrailingZeroBits*(a: BitsArray): int=
   else:
     result = a.len - lastOne - 1
 
+proc expand*(a: BitsArray, len: int) =
+  assert(len >= a.len)
+  let
+    extra_bits = len - a.len
+    existing_blocks = a.blocks
+    wasted_bits = a.len mod BLOCK_LEN
+  a.bits[a.blocks-1] = a.bits[a.blocks-1].bitand(BLOCK_HEADS_BITS[BLOCK_LEN - wasted_bits])
+  a.len = len
+  let
+    new_blocks = a.blocks - a.blocks
+  if new_blocks > 0:
+    a.bits.add(BlockInt.low)
+
 when isMainModule:
   var
     a = newBitsArray(70)
     b = newBitsArray(70)
   
-  echo a
+  echo "    a = ",a
+  echo "    b = ",b
+  echo "set bits ..."
   a.setBits(0,1,2,3,4,69)
+  b.setBits(6,7,8,9,65)
+  echo "    a = ",a
+  echo "    b = ",b
+  echo "a & b = ", a & b
+  echo "a | b = ", a | b
+  echo "a ^ b = ", a ^ b
+  echo "   ~a = ", ~a
+  echo "a.shl(1) =",a.shl(1)
+  echo "a.shl(2) =",a.shl(2)
+  echo "a.shl(3) =",a.shl(3)
+  echo "a.shl(69)=",a.shl(69)
+  echo "a.shr(1) =",a.shr(1)
+  echo "a.shr(2) =",a.shr(2)
+  echo "a.shr(3) =",a.shr(3)
+  echo "a.shr(69)=",a.shr(69)
+
+  a.expand(100)
   echo a
-  # b.setAll
-  # echo a & b
-  # echo a | b
-  # echo a ^ b
-  # echo ~a
-  # echo a.nbytes
-  echo a.shl(1)
-  echo a.shl(2)
-  echo a.shl(3)
-  echo a.shl(69)
-  echo a.shr(1)
-  echo a.shr(2)
-  echo a.shr(3)
-  echo a.shr(69)

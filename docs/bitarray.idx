@@ -32,4 +32,7 @@ lastSetBit	bitarray.html#lastSetBit,BitsArray	bitarray: lastSetBit(a: BitsArray)
 countLeadingZeroBits	bitarray.html#countLeadingZeroBits,BitsArray	bitarray: countLeadingZeroBits(a: BitsArray): int	
 countTrailingZeroBits	bitarray.html#countTrailingZeroBits,BitsArray	bitarray: countTrailingZeroBits(a: BitsArray): int	
 expand	bitarray.html#expand,BitsArray,int	bitarray: expand(a: BitsArray; len: int)	
-toBitsArray	bitarray.html#toBitsArray,any	bitarray: toBitsArray(a: any): BitsArray	
+concat	bitarray.html#concat,BitsArray,BitsArray	bitarray: concat(a, b: BitsArray): BitsArray	
+toBitsArray	bitarray.html#toBitsArray,T	bitarray: toBitsArray[T: not string](a: T): BitsArray	
+toBitsArray	bitarray.html#toBitsArray,string	bitarray: toBitsArray(a: string): BitsArray	
+binToBitsArray	bitarray.html#binToBitsArray,string	bitarray: binToBitsArray(a: string): BitsArray	

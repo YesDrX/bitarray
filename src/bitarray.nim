@@ -337,12 +337,86 @@ proc expand*(a: BitsArray, len: int) =
   if new_blocks > 0:
     a.bits.add(BlockInt.low)
 
-proc toBitsArray*(a: any): BitsArray=
+proc concat*(a, b: BitsArray): BitsArray=
+  ## Concatenate b to the right of a.
+  ##
+  runnableExamples:
+    doAssert "a".toBitsArray.`$` == "10000110"
+    doAssert "b".toBitsArray.`$` == "01000110"
+    doAssert ("a".toBitsArray).concat("b".toBitsArray).`$` == "1000011001000110"
+
+  if a.len == 0:
+    return b.copy
+  elif b.len == 0:
+    return a.copy
+  else:
+    var
+      wasted_bits_a = if a.len mod BLOCK_LEN > 0 : (a.len mod BLOCK_LEN) else: 0
+      wasted_bits_b = if b.len mod BLOCK_LEN > 0 : (b.len mod BLOCK_LEN) else: 0
+    result = newBitsArray(a.len + b.len)
+    if  wasted_bits_a > 0:
+      var
+        head_b = b.copy()
+        shifted_b = b.shl(wasted_bits_a)
+      head_b.len = BLOCK_LEN
+      head_b.bits[0] = head_b.bits[0].bitand(BLOCK_HEADS_BITS[a.len mod BLOCK_LEN])
+      head_b = head_b.shr(a.len mod BLOCK_LEN)
+      for i in 0 ..< a.blocks:
+        result.bits[i] = a.bits[i]
+      result.bits[a.blocks-1] = result.bits[a.blocks-1].bitand(BLOCK_HEADS_BITS[a.len mod BLOCK_LEN])
+      result.bits[a.blocks-1] = result.bits[a.blocks-1].bitor(head_b.bits[0])
+      for i in a.blocks ..< result.blocks:
+        result.bits[i] = shifted_b.bits[i - a.blocks]
+    else:
+      for i in 0 ..< a.blocks:
+        result.bits[i] = a.bits[i]
+      for i in a.blocks ..< result.blocks:
+        result.bits[i] = b.bits[i - a.blocks]
+
+proc toBitsArray*[T: not string](a: T): BitsArray=
   ## Convert any basic type, such as int,float,bool, to a BitsArray.
   ## 
+  runnableExamples:
+    doAssert true.toBitsArray.`$` == "10000000"
+    doAssert int8.low.toBitsArray.`$` == "00000001"
+
   assert a.sizeof <= BlockInt.sizeof
   result = newBitsArray(a.sizeof * 8)
   result.bits[0] = cast[BlockInt](a)
+
+proc toBitsArray*(a: string): BitsArray=
+  ## Convert string to its bits representation.
+  ##
+  runnableExamples:
+    doAssert "a".toBitsArray.`$` == "10000110"
+    doAssert "b".toBitsArray.`$` == "01000110"
+    doAssert "ab".toBitsArray.`$` == "1000011001000110"
+
+  result = newBitsArray(a.len * 8)
+  var
+    tmp: BitsArray
+  for i in 0 ..< (a.len div BlockInt.sizeof):
+    tmp = a[i * BlockInt.sizeof].toBitsArray
+    for j in 1 ..< BlockInt.sizeof:
+      tmp = tmp.concat(a[i * BlockInt.sizeof + j].toBitsArray)
+    result.bits[i] = cast[BlockInt](a[i])
+  if a.len mod BlockInt.sizeof > 0:
+    var
+      i = a.len div BlockInt.sizeof
+    tmp = a[i * BlockInt.sizeof].toBitsArray
+    for j in 1 ..< (a.len mod BlockInt.sizeof):
+      tmp = tmp.concat(a[i * BlockInt.sizeof + j].toBitsArray)
+    result.bits[result.blocks - 1] = tmp.bits[0]
+
+proc binToBitsArray*(a: string): BitsArray=
+  ## Convert a binary representation string to BitsArray
+  ##
+  runnableExamples:
+    doAssert "010101".binToBitsArray.`$` == "010101"
+
+  result = newBitsArray(a.len)
+  for i in 0 ..< a.len:
+    if a[i] == '1': result.setBits(i)
 
 when isMainModule:
   var

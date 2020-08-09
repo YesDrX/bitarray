@@ -18,7 +18,8 @@ export bitops, strutils, utils
 ## 
 ## You may change the underlying BlockInt definition (in utils) to force define BlockInt to a different len, say 16-bits on a 64-bits CPU.
 ## 
-## NOTE: Bits are left aligned, so least significant bit is at location 0. So 10000110 is equal to 127 ('a'), rather than 134.
+## NOTE: Bits are left aligned, so least significant bit is at location 0. So 10000110 is equal to 127 ('a'), rather than 134. Use proc reverseBits when necessary.
+## 
 ## 
 type
   BitsArray* = ref object

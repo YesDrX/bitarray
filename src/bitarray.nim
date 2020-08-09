@@ -169,14 +169,20 @@ proc flipAll*(a: BitsArray) =
 proc sum*(a: BitsArray): int=
   result = a.countSetBits
 
+proc nbytes*(a:BitsArray): int=
+  result = a.blocks * uint.sizeof
+
 when isMainModule:
   var
-    a = newBitsArray(9000000)
-    b = newBitsArray(9000000)
+    a = newBitsArray(70)
+    b = newBitsArray(70)
   
-  echo a.sum
-  a.setAll
-  echo a.sum
-  echo a.blocks
-  echo (a | b).sum()
-  echo (a ^ b).sum()
+  echo a
+  echo b
+  a.setBits(0,1,2)
+  b.setAll
+  echo a & b
+  echo a | b
+  echo a ^ b
+  echo ~a
+  echo a.nbytes

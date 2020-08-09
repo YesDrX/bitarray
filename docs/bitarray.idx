@@ -1,0 +1,33 @@
+BitsArray	bitarray.html#BitsArray	bitarray: BitsArray	
+newBitsArray	bitarray.html#newBitsArray,int	bitarray: newBitsArray(len: int): BitsArray	
+blocks	bitarray.html#blocks,BitsArray	bitarray: blocks(bit_arr: BitsArray): int	
+`$`	bitarray.html#$,BitsArray	bitarray: `$`(bit_arr: BitsArray): string	
+get_bit_position	bitarray.html#get_bit_position,int	bitarray: get_bit_position(loc: int): (int, int)	
+setBit	bitarray.html#setBit,BitsArray,int	bitarray: setBit(bit_arr: BitsArray; loc: int)	
+clearBit	bitarray.html#clearBit,BitsArray,int	bitarray: clearBit(bit_arr: BitsArray; loc: int)	
+flipBit	bitarray.html#flipBit,BitsArray,int	bitarray: flipBit(bit_arr: BitsArray; loc: int)	
+testBit	bitarray.html#testBit,BitsArray,int	bitarray: testBit(bit_arr: BitsArray; loc: int): bool	
+countSetBits	bitarray.html#countSetBits,BitsArray	bitarray: countSetBits(bit_arr: BitsArray): int	
+`&amp;`	bitarray.html#&,BitsArray,BitsArray	bitarray: `&amp;`(a, b: BitsArray): BitsArray	
+`|`	bitarray.html#|,BitsArray,BitsArray	bitarray: `|`(a, b: BitsArray): BitsArray	
+`~`	bitarray.html#~,BitsArray	bitarray: `~`(a: BitsArray): BitsArray	
+`^`	bitarray.html#^,BitsArray,BitsArray	bitarray: `^`(a, b: BitsArray): BitsArray	
+`[]`	bitarray.html#[],BitsArray,int	bitarray: `[]`(a: BitsArray; loc: int): bool	
+`[]`	bitarray.html#[],BitsArray,openArray[int]	bitarray: `[]`(a: BitsArray; locs: openArray[int]): BitsArray	
+`[]`	bitarray.html#[],BitsArray,HSlice	bitarray: `[]`(a: BitsArray; locs: HSlice): BitsArray	
+`[]=`	bitarray.html#[]=,BitsArray,int,bool	bitarray: `[]=`(a: BitsArray; loc: int; value: bool)	
+`[]=`	bitarray.html#[]=,BitsArray,openArray[int],bool	bitarray: `[]=`(a: BitsArray; locs: openArray[int]; value: bool)	
+`[]=`	bitarray.html#[]=,BitsArray,HSlice,bool	bitarray: `[]=`(a: BitsArray; locs: HSlice; value: bool)	
+copy	bitarray.html#copy,BitsArray	bitarray: copy(a: BitsArray): BitsArray	
+swap	bitarray.html#swap,BitsArray,BitsArray	bitarray: swap(a, b: BitsArray)	
+setAll	bitarray.html#setAll,BitsArray	bitarray: setAll(a: BitsArray)	
+clearAll	bitarray.html#clearAll,BitsArray	bitarray: clearAll(a: BitsArray)	
+flipAll	bitarray.html#flipAll,BitsArray	bitarray: flipAll(a: BitsArray)	
+sum	bitarray.html#sum,BitsArray	bitarray: sum(a: BitsArray): int	
+nbytes	bitarray.html#nbytes,BitsArray	bitarray: nbytes(a: BitsArray): int	
+`shl`	bitarray.html#shl,BitsArray,SomeInteger	bitarray: `shl`(a: BitsArray; steps: SomeInteger): BitsArray	
+`shr`	bitarray.html#shr,BitsArray,SomeInteger	bitarray: `shr`(a: BitsArray; steps: SomeInteger): BitsArray	
+firstSetBit	bitarray.html#firstSetBit,BitsArray	bitarray: firstSetBit(a: BitsArray): int	
+lastSetBit	bitarray.html#lastSetBit,BitsArray	bitarray: lastSetBit(a: BitsArray): int	
+countLeadingZeroBits	bitarray.html#countLeadingZeroBits,BitsArray	bitarray: countLeadingZeroBits(a: BitsArray): int	
+countTrailingZeroBits	bitarray.html#countTrailingZeroBits,BitsArray	bitarray: countTrailingZeroBits(a: BitsArray): int	

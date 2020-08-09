@@ -1,61 +1,94 @@
 import bitops
 import strutils
+import utils
+export bitops, strutils, utils
 
-const
-  BLOCK_LEN* = uint.sizeof * 8
-
+## BitsArray Type
+##     bits is a sequence of BlockInt (uint64/uint32/uint16/uint8, depending on CPU)
+## 
+##     len is the number of bits
+## 
+## BitsArray is saved in BlockInt blocks
+## 
+## For example, on a 64-bit machine, memory layout of BitsArray.bits is
+## 
+## |<---64 bits--->|<---64 bits--->|<---64 bits--->|...|<---64 bits--->|
+## 
+## Bits are left aligned, so when (len mod 64 != 0), the last (len mod 64) bits memory is wasted.
+## 
+## You may change the underlying BlockInt definition (in utils) to force define BlockInt to a different len, say 16-bits on a 64-bits CPU.
+## 
 type
   BitsArray* = ref object
-    bits*: seq[uint]
+    bits*: seq[BlockInt]
     len*: int
 
 proc newBitsArray*(len: int): BitsArray=
+  ## Construct a new BitsArray with len bits.
   var
     int_len = len div BLOCK_LEN
   if len mod BLOCK_LEN > 0 : int_len += 1
-  result = BitsArray(bits: newSeq[uint](int_len), len: len)
+  result = BitsArray(bits: newSeq[uint64](int_len), len: len)
 
 proc blocks*(bit_arr: BitsArray): int=
+  ## Get the number of blocks (BlockInt) saved. For example, a 70 bits array takes 2 blocks.
   result = bit_arr.len div BLOCK_LEN
   if bit_arr.len mod BLOCK_LEN > 0 : result += 1
 
 proc `$`*(bit_arr: BitsArray): string=
+  ## Return the 0-1 string representation of the BitsArray.
   result = ""
   if bit_arr.len mod BLOCK_LEN == 0:
     for i in 0 ..< bit_arr.blocks:
-      result &= bit_arr.bits[i].int.toBin(BLOCK_LEN)
+      result &= bit_arr.bits[i].toBin(BLOCK_LEN)
   else:
     for i in 0 ..< (bit_arr.blocks - 1):
-      result &= bit_arr.bits[i].int.toBin(BLOCK_LEN)
-    result &= bit_arr.bits[bit_arr.blocks-1].int.toBin(BLOCK_LEN)[0 .. (bit_arr.len mod BLOCK_LEN - 1)]
+      result &= bit_arr.bits[i].toBin(BLOCK_LEN)
+    result &= bit_arr.bits[bit_arr.blocks-1].toBin(BLOCK_LEN)[0 .. (bit_arr.len mod BLOCK_LEN - 1)]
 
 proc get_bit_position*(loc: int): (int, int)=
+  ## Given a bit location (0<=loc<=len)
+  ## return
+  ##        (block location: int, location inside the block: int)
+  ## 
   var
     block_loc = loc div BLOCK_LEN
     in_block_loc = loc mod BLOCK_LEN
-  result = (block_loc, BLOCK_LEN - in_block_loc - 1)
+  result = (block_loc, in_block_loc)
 
 proc setBit*(bit_arr: BitsArray, loc: int) =
+  ## Set bit value at location loc to be 1.
+  ## With macros from bitops, you may use setBits to set multiple bits.
+  ## 
   var
     (block_loc, in_block_loc) = loc.get_bit_position
   setBit(bit_arr.bits[block_loc], in_block_loc)
 
 proc clearBit*(bit_arr: BitsArray, loc: int) =
+  ## Set bit value at location loc to be 0.
+  ## With macros from bitops, you may use setBits to clear multiple bits.
+  ## 
   var
     (block_loc, in_block_loc) = loc.get_bit_position
   clearBit(bit_arr.bits[block_loc], in_block_loc)
 
 proc flipBit*(bit_arr: BitsArray, loc: int) =
+  ## Flip bit value at location loc.
+  ## With macros from bitops, you may use setBits to flip multiple bits.
+  ## 
   var
     (block_loc, in_block_loc) = loc.get_bit_position
   flipBit(bit_arr.bits[block_loc], in_block_loc)
 
 proc testBit*(bit_arr: BitsArray, loc: int): bool =
+  ## Check whether bit value at location loc is equal to 1.
+  ## 
   var
     (block_loc, in_block_loc) = loc.get_bit_position
   testBit(bit_arr.bits[block_loc], in_block_loc)
 
 proc countSetBits*(bit_arr: BitsArray): int =
+  ## Counts the set bits in integer. (also called Hamming weight.)
   result = 0
   if bit_arr.len mod BLOCK_LEN > 0:
     for i in (bit_arr.len mod BLOCK_LEN) ..< BLOCK_LEN:
@@ -64,6 +97,7 @@ proc countSetBits*(bit_arr: BitsArray): int =
     result += bit_arr.bits[i].countSetBits
 
 proc `&`*(a, b: BitsArray): BitsArray =
+  ## Computes the bitwise and of a and b.
   assert( a.len == b.len)
 
   result = newBitsArray(a.len)
@@ -71,6 +105,8 @@ proc `&`*(a, b: BitsArray): BitsArray =
     result.bits[i] = bitand(a.bits[i], b.bits[i])
 
 proc `|`*(a, b: BitsArray): BitsArray =
+  ## Computes the bitwise or of a and b.
+  ## 
   assert( a.len == b.len)
 
   result = newBitsArray(a.len)
@@ -78,25 +114,34 @@ proc `|`*(a, b: BitsArray): BitsArray =
     result.bits[i] = bitor(a.bits[i], b.bits[i])
 
 proc `~`*(a: BitsArray): BitsArray =
+  ## Computes the bitwise not of a.
+  ## 
   result = newBitsArray(a.len)
   for i in 0 ..< a.blocks:
     result.bits[i] = bitnot(a.bits[i])
 
 proc `^`*(a,b : BitsArray): BitsArray =
+  ## Computes the bitwise xor of a and b.
+  ## 
   result = newBitsArray(a.len)
   for i in 0 ..< a.blocks:
     result.bits[i] = bitxor(a.bits[i], b.bits[i])
 
 proc `[]`*(a: BitsArray, loc: int): bool=
+  ## Test bit value at loc.
   result = a.testBit(loc)
 
 proc `[]`*(a: BitsArray, locs: openArray[int]): BitsArray=
+  ## Slice the BitsArray with the given locs.
+  ## 
   result = newBitsArray(locs.len)
   for i, loc in locs:
     if a.testBit(loc):
       result.setBit(i)
 
 proc `[]`*(a: BitsArray, locs: HSlice): BitsArray=
+  ## Slice the BitsArray with the given locs.
+  ## 
   var
     l = if (locs.a is BackwardsIndex): -locs.a.int else: locs.a.int
     r = if (locs.b is BackwardsIndex): -locs.b.int else: locs.b.int
@@ -112,12 +157,16 @@ proc `[]`*(a: BitsArray, locs: HSlice): BitsArray=
     i += 1
 
 proc `[]=`*(a: BitsArray, loc: int, value: bool) =
+  ## Assign bit at loc to value.
+  ## 
   if value:
     a.setBit(loc)
   else:
     a.clearBit(loc)
 
 proc `[]=`*(a: BitsArray, locs: openArray[int], value: bool) =
+  ## Assign bit at locs to value.
+  ## 
   if value:
     for loc in locs:
       a.setBit(loc)
@@ -126,6 +175,8 @@ proc `[]=`*(a: BitsArray, locs: openArray[int], value: bool) =
       a.clearBit(loc)
 
 proc `[]=`*(a: BitsArray, locs: HSlice, value: bool) =
+  ## Assign bit at locs to value.
+  ## 
   var
     l = if (locs.a is BackwardsIndex): -locs.a.int else: locs.a.int
     r = if (locs.b is BackwardsIndex): -locs.b.int else: locs.b.int
@@ -144,47 +195,146 @@ proc `[]=`*(a: BitsArray, locs: HSlice, value: bool) =
       i += 1
 
 proc copy*(a: BitsArray): BitsArray=
+  ## Make a new copy of BitsArray (different memory locations).
+  ## 
   result = newBitsArray(a.len)
   for i in 0 ..< a.blocks:
     result.bits[i] = a.bits[i]
 
 proc swap*(a, b: BitsArray) =
+  ## Swap a and b.
   assert(a.len == b.len)
 
   for i in 0 ..< a.blocks:
     swap(a.bits[i], b.bits[i])
 
 proc setAll*(a: BitsArray) =
+  ## Set all bits to be 1.
+  ## 
   for i in 0 ..< a.blocks:
-    a.bits[i] = uint.high
+    a.bits[i] = uint64.high
 
 proc clearAll*(a: BitsArray) =
+  ## Set all bits to be 0.
+  ## 
   for i in 0 ..< a.blocks:
-    a.bits[i] = uint.low
+    a.bits[i] = uint64.low
 
 proc flipAll*(a: BitsArray) =
+  ## Flip all bits.
+  ## 
   for i in 0 ..< a.blocks:
     a.bits[i] = bitnot(a.bits[i])
 
 proc sum*(a: BitsArray): int=
+  ## Return number of bits of value 1.
+  ##
   result = a.countSetBits
 
 proc nbytes*(a:BitsArray): int=
-  result = a.blocks * uint.sizeof
+  ## Return number of bytes (8 * bits) taken by the BitsArray.bits.
+  ##
+  result = a.blocks * uint64.sizeof
 
-export bitops, strutils
+proc `shl`*(a: BitsArray, steps: SomeInteger): BitsArray=
+  ## Return a new BitsArray, where bits are shifted left by steps.
+  ##
+  runnableExamples:
+    var a = newBitsArray(70)
+    a.setBits(69)
+    var b = a.shl(69)
+    doAssert a.`$` == "0000000000000000000000000000000000000000000000000000000000000000000001"
+    doAssert b.`$` == "1000000000000000000000000000000000000000000000000000000000000000000000"
+  
+  result = newBitsArray(a.len)
+  var
+    blocks_to_abandon = steps div BLOCK_LEN
+    blocks_to_keep = a.blocks - blocks_to_abandon
+    shifts_in_block = steps mod BLOCK_LEN
+    block_idx: int
+    left_shifted: BlockInt = 0.BlockInt
+
+  for i in 0 ..< blocks_to_keep:
+    block_idx = i + blocks_to_abandon
+    result.bits[i] = a.bits[block_idx].shr(shifts_in_block)
+    if i > 0:
+      result.bits[i] = result.bits[i].bitor(left_shifted)
+    left_shifted = a.bits[block_idx].bitand(BLOCK_HEADS_BITS[shifts_in_block])
+
+proc `shr`*(a: BitsArray, steps: SomeInteger): BitsArray=
+  ## Return a new BitsArray, where bits are shifted right by steps.
+  ##
+  runnableExamples:
+    var a = newBitsArray(70)
+    a.setBits(0)
+    var b = a.shr(69)
+    doAssert a.`$` == "1000000000000000000000000000000000000000000000000000000000000000000000"
+    doAssert b.`$` == "0000000000000000000000000000000000000000000000000000000000000000000001"  
+  result = newBitsArray(a.len)
+  var
+    blocks_to_abandon = steps div BLOCK_LEN
+    blocks_to_keep = a.blocks - blocks_to_abandon
+    shifts_in_block = steps mod BLOCK_LEN
+    block_idx: int
+    right_shifted: BlockInt = 0.BlockInt
+
+  for i in 0 ..< blocks_to_keep:
+    block_idx = a.blocks - (i + blocks_to_abandon) - 1
+    result.bits[a.blocks - block_idx - 1] = a.bits[block_idx].shl(shifts_in_block)
+    if i > 0:
+      result.bits[a.blocks - block_idx - 1] = result.bits[a.blocks - block_idx - 1].bitor(right_shifted)
+    right_shifted = a.bits[block_idx].bitand(BLOCK_TAILS_BITS[shifts_in_block])
+
+proc firstSetBit*(a: BitsArray): int=
+  ## Return first location of first bit of value 1. If no bit is of value 1, -1 is returned.
+  ##
+
+  result = -1
+  for i in 0 ..< a.blocks:
+    if a.bits[i] > 0:
+      return i * BLOCK_LEN + a.bits[i].firstSetBit - 1
+
+proc lastSetBit*(a: BitsArray): int=
+  ## Return last location of first bit of value 1. If no bit is of value 1, -1 is returned.
+  ##
+  result = -1
+  for i in countdown(a.blocks-1, 0, 1):
+    if a.bits[i] > 0:
+      return i * BLOCK_LEN + a.bits[i].firstSetBit - 1
+
+proc countLeadingZeroBits*(a: BitsArray): int=
+  ## Return number of leading zero bits.
+  ## 
+  let
+    firstOne = a.firstSetBit
+  if firstOne < 0:
+    result = a.len
+  else:
+    result = firstOne
+
+proc countTrailingZeroBits*(a: BitsArray): int=
+  ## Return number of trailing zero bits.
+  ## 
+  let
+    lastOne = a.lastSetBit
+  if lastOne < 0:
+    result = a.len
+  else:
+    result = a.len - lastOne - 1
 
 when isMainModule:
   var
     a = newBitsArray(70)
     b = newBitsArray(70)
+    c = newBitsArray(70)
   
   echo a
+  a.setBits(69)
+  echo a
+  echo a.countTrailingZeroBits
+  b = a.shl(69)
   echo b
-  a.setBits(0,1,2)
-  b.setAll
-  echo a & b
-  echo a | b
-  echo a ^ b
-  echo ~a
-  echo a.nbytes
+  echo b.countTrailingZeroBits
+  c = b.shr(69)
+  echo c
+  echo c.countTrailingZeroBits

@@ -172,6 +172,8 @@ proc sum*(a: BitsArray): int=
 proc nbytes*(a:BitsArray): int=
   result = a.blocks * uint.sizeof
 
+export bitops, strutils
+
 when isMainModule:
   var
     a = newBitsArray(70)

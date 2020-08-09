@@ -28,7 +28,7 @@ proc newBitsArray*(len: int): BitsArray=
   var
     int_len = len div BLOCK_LEN
   if len mod BLOCK_LEN > 0 : int_len += 1
-  result = BitsArray(bits: newSeq[uint64](int_len), len: len)
+  result = BitsArray(bits: newSeq[BlockInt](int_len), len: len)
 
 proc blocks*(bit_arr: BitsArray): int=
   ## Get the number of blocks (BlockInt) saved. For example, a 70 bits array takes 2 blocks.
@@ -212,13 +212,13 @@ proc setAll*(a: BitsArray) =
   ## Set all bits to be 1.
   ## 
   for i in 0 ..< a.blocks:
-    a.bits[i] = uint64.high
+    a.bits[i] = BlockInt.high
 
 proc clearAll*(a: BitsArray) =
   ## Set all bits to be 0.
   ## 
   for i in 0 ..< a.blocks:
-    a.bits[i] = uint64.low
+    a.bits[i] = BlockInt.low
 
 proc flipAll*(a: BitsArray) =
   ## Flip all bits.
@@ -234,7 +234,7 @@ proc sum*(a: BitsArray): int=
 proc nbytes*(a:BitsArray): int=
   ## Return number of bytes (8 * bits) taken by the BitsArray.bits.
   ##
-  result = a.blocks * uint64.sizeof
+  result = a.blocks * BlockInt.sizeof
 
 proc `shl`*(a: BitsArray, steps: SomeInteger): BitsArray=
   ## Return a new BitsArray, where bits are shifted left by steps.

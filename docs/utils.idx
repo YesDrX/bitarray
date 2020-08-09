@@ -1,5 +1,0 @@
-BlockInt	utils.html#BlockInt	utils: BlockInt	
-BLOCK_LEN	utils.html#BLOCK_LEN	utils: BLOCK_LEN	
-BLOCK_HEADS_BITS	utils.html#BLOCK_HEADS_BITS	utils: BLOCK_HEADS_BITS	
-BLOCK_TAILS_BITS	utils.html#BLOCK_TAILS_BITS	utils: BLOCK_TAILS_BITS	
-toBin	utils.html#toBin,BlockInt,Positive	utils: toBin(x: BlockInt; len: Positive): string	

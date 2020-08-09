@@ -1,0 +1,5 @@
+BlockInt	bitarray_utils.html#BlockInt	bitarray_utils: BlockInt	
+BLOCK_LEN	bitarray_utils.html#BLOCK_LEN	bitarray_utils: BLOCK_LEN	
+BLOCK_HEADS_BITS	bitarray_utils.html#BLOCK_HEADS_BITS	bitarray_utils: BLOCK_HEADS_BITS	
+BLOCK_TAILS_BITS	bitarray_utils.html#BLOCK_TAILS_BITS	bitarray_utils: BLOCK_TAILS_BITS	
+toBin	bitarray_utils.html#toBin,BlockInt,Positive	bitarray_utils: toBin(x: BlockInt; len: Positive): string	

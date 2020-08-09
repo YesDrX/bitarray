@@ -12,11 +12,9 @@ export bitops, strutils, utils
 ## 
 ## For example, on a 64-bit machine, memory layout of BitsArray.bits is
 ## 
-## |               |               |               |   |               |
 ## 
 ## |<---64 bits--->|<---64 bits--->|<---64 bits--->|...|<---64 bits--->|
 ## 
-## |               |               |               |   |               |
 ## 
 ## Bits are left aligned, so when (len mod 64 != 0), the last (64 - len mod 64) bits memory is wasted.
 ## 

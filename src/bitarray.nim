@@ -12,9 +12,13 @@ export bitops, strutils, utils
 ## 
 ## For example, on a 64-bit machine, memory layout of BitsArray.bits is
 ## 
+## |               |               |               |   |               |
+## 
 ## |<---64 bits--->|<---64 bits--->|<---64 bits--->|...|<---64 bits--->|
 ## 
-## Bits are left aligned, so when (len mod 64 != 0), the last (len mod 64) bits memory is wasted.
+## |               |               |               |   |               |
+## 
+## Bits are left aligned, so when (len mod 64 != 0), the last (64 - len mod 64) bits memory is wasted.
 ## 
 ## You may change the underlying BlockInt definition (in utils) to force define BlockInt to a different len, say 16-bits on a 64-bits CPU.
 ## 

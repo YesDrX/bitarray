@@ -215,8 +215,10 @@ function main() {
 </dl>
 <p>BitsArray is saved in BlockInt blocks</p>
 <p>For example, on a 64-bit machine, memory layout of BitsArray.bits is</p>
+<p>|               |               |               |   |               |</p>
 <p>|&lt;---64 bits---&gt;|&lt;---64 bits---&gt;|&lt;---64 bits---&gt;|...|&lt;---64 bits---&gt;|</p>
-<p>Bits are left aligned, so when (len mod 64 != 0), the last (len mod 64) bits memory is wasted.</p>
+<p>|               |               |               |   |               |</p>
+<p>Bits are left aligned, so when (len mod 64 != 0), the last (64 - len mod 64) bits memory is wasted.</p>
 <p>You may change the underlying BlockInt definition (in utils) to force define BlockInt to a different len, say 16-bits on a 64-bits CPU.</p>
 <p>NOTE: Bits are left aligned, so least significant bit is at location 0. So 10000110 is equal to 127 ('a'), rather than 134. Use proc reverseBits when necessary.</p>
 </p>
@@ -565,7 +567,7 @@ Return the bit reversal of a.
       <div class="twelve-columns footer">
         <span class="nim-sprite"></span>
         <br/>
-        <small style="color: var(--hint);">Made with Nim. Generated: 2020-08-09 20:50:55 UTC</small>
+        <small style="color: var(--hint);">Made with Nim. Generated: 2020-08-09 20:53:54 UTC</small>
       </div>
     </div>
   </div>

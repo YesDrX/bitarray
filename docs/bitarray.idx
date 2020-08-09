@@ -31,3 +31,4 @@ firstSetBit	bitarray.html#firstSetBit,BitsArray	bitarray: firstSetBit(a: BitsArr
 lastSetBit	bitarray.html#lastSetBit,BitsArray	bitarray: lastSetBit(a: BitsArray): int	
 countLeadingZeroBits	bitarray.html#countLeadingZeroBits,BitsArray	bitarray: countLeadingZeroBits(a: BitsArray): int	
 countTrailingZeroBits	bitarray.html#countTrailingZeroBits,BitsArray	bitarray: countTrailingZeroBits(a: BitsArray): int	
+expand	bitarray.html#expand,BitsArray,int	bitarray: expand(a: BitsArray; len: int)	

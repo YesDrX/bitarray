@@ -323,6 +323,8 @@ proc countTrailingZeroBits*(a: BitsArray): int=
     result = a.len - lastOne - 1
 
 proc expand*(a: BitsArray, len: int) =
+  ## Expand BitsArray to be of length len.
+  ## 
   assert(len >= a.len)
   let
     extra_bits = len - a.len

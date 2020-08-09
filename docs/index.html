@@ -190,6 +190,8 @@ function main() {
     title="toBitsArray(a: string): BitsArray"><wbr />to<wbr />Bits<wbr />Array<span class="attachedType">BitsArray</span></a></li>
   <li><a class="reference" href="#binToBitsArray%2Cstring"
     title="binToBitsArray(a: string): BitsArray"><wbr />bin<wbr />To<wbr />Bits<wbr />Array<span class="attachedType">BitsArray</span></a></li>
+  <li><a class="reference" href="#reverseBits%2CBitsArray"
+    title="reverseBits(a: BitsArray): BitsArray"><wbr />reverse<wbr />Bits<span class="attachedType">BitsArray</span></a></li>
 
   </ul>
 </li>
@@ -538,6 +540,16 @@ Convert a binary representation string to BitsArray
 <pre class="listing"><span class="Identifier">doAssert</span> <span class="StringLit">&quot;010101&quot;</span><span class="Other">.</span><span class="Identifier">binToBitsArray</span><span class="Other">.</span><span class="Other">`</span><span class="Operator">$</span><span class="Other">`</span> <span class="Operator">==</span> <span class="StringLit">&quot;010101&quot;</span></pre>
 
 </dd>
+<a id="reverseBits,BitsArray"></a>
+<dt><pre><span class="Keyword">proc</span> <a href="#reverseBits%2CBitsArray"><span class="Identifier">reverseBits</span></a><span class="Other">(</span><span class="Identifier">a</span><span class="Other">:</span> <a href="bitarray.html#BitsArray"><span class="Identifier">BitsArray</span></a><span class="Other">)</span><span class="Other">:</span> <a href="bitarray.html#BitsArray"><span class="Identifier">BitsArray</span></a> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
+<dd>
+
+Return the bit reversal of a. 
+<p><strong class="examples_text">Examples:</strong></p>
+<pre class="listing"><span class="Identifier">doAssert</span> <span class="DecNumber">7</span><span class="Other">.</span><span class="Identifier">uint16</span><span class="Other">.</span><span class="Identifier">toBitsArray</span><span class="Other">.</span><span class="Other">`</span><span class="Operator">$</span><span class="Other">`</span> <span class="Operator">==</span> <span class="StringLit">&quot;1110000000000000&quot;</span>
+<span class="Identifier">doAssert</span> <span class="DecNumber">7</span><span class="Other">.</span><span class="Identifier">uint16</span><span class="Other">.</span><span class="Identifier">toBitsArray</span><span class="Other">.</span><span class="Identifier">reverseBits</span><span class="Other">.</span><span class="Other">`</span><span class="Operator">$</span><span class="Other">`</span> <span class="Operator">==</span> <span class="StringLit">&quot;0000000000000111&quot;</span></pre>
+
+</dd>
 
 </dl></div>
 <div class="section" id="19">
@@ -553,7 +565,7 @@ Convert a binary representation string to BitsArray
       <div class="twelve-columns footer">
         <span class="nim-sprite"></span>
         <br/>
-        <small style="color: var(--hint);">Made with Nim. Generated: 2020-08-09 20:21:32 UTC</small>
+        <small style="color: var(--hint);">Made with Nim. Generated: 2020-08-09 20:48:09 UTC</small>
       </div>
     </div>
   </div>

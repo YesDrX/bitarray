@@ -425,6 +425,24 @@ proc binToBitsArray*(a: string): BitsArray=
   for i in 0 ..< a.len:
     if a[i] == '1': result.setBits(i)
 
+proc reverseBits*(a: BitsArray): BitsArray=
+  ## Return the bit reversal of a.
+  ## 
+  runnableExamples:
+    doAssert 7.uint16.toBitsArray.`$` == "1110000000000000"
+    doAssert 7.uint16.toBitsArray.reverseBits.`$` == "0000000000000111"
+  
+  result = newBitsArray(a.len)
+  var
+    wasted_bits = if a.len mod BLOCK_LEN > 0: (BLOCK_LEN - a.len mod BLOCK_LEN) else : 0
+    shifted_a : BitsArray
+  if wasted_bits > 0:
+    shifted_a = a.shr(wasted_bits)
+  else:
+    shallowCopy(shifted_a, a)
+  for i in a.blocks-1 .. 0:
+    result.bits[i - a.blocks + 1] = shifted_a.bits[i].reverseBits
+
 when isMainModule:
   var
     a = newBitsArray(70)

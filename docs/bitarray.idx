@@ -36,3 +36,4 @@ concat	bitarray.html#concat,BitsArray,BitsArray	bitarray: concat(a, b: BitsArray
 toBitsArray	bitarray.html#toBitsArray,T	bitarray: toBitsArray[T: not string](a: T): BitsArray	
 toBitsArray	bitarray.html#toBitsArray,string	bitarray: toBitsArray(a: string): BitsArray	
 binToBitsArray	bitarray.html#binToBitsArray,string	bitarray: binToBitsArray(a: string): BitsArray	
+reverseBits	bitarray.html#reverseBits,BitsArray	bitarray: reverseBits(a: BitsArray): BitsArray	

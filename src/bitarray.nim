@@ -337,6 +337,13 @@ proc expand*(a: BitsArray, len: int) =
   if new_blocks > 0:
     a.bits.add(BlockInt.low)
 
+proc toBitsArray*(a: any): BitsArray=
+  ## Convert any basic type, such as int,float,bool, to a BitsArray.
+  ## 
+  assert a.sizeof <= BlockInt.sizeof
+  result = newBitsArray(a.sizeof * 8)
+  result.bits[0] = cast[BlockInt](a)
+
 when isMainModule:
   var
     a = newBitsArray(70)

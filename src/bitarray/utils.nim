@@ -3,14 +3,19 @@ import bitops
 when int.sizeof == 16:
   # maybe in the future, we can have 128-bit cpu.
   type BlockInt* = uint128
+  const BLOCK_LEN_POWER_2* = 7
 elif int.sizeof == 8:
   type BlockInt* = uint64
+  const BLOCK_LEN_POWER_2* = 6
 elif int.sizeof == 4:
   type BlockInt* = uint32
+  const BLOCK_LEN_POWER_2* = 5
 elif int.sizeof == 2:
   type BlockInt* = uint16
+  const BLOCK_LEN_POWER_2* = 4
 elif int.sizeof == 1:
   type BlockInt* = uint8
+  const BLOCK_LEN_POWER_2* = 3
 else:
   quit "what kind of cpu you have?"
 
@@ -57,10 +62,10 @@ proc toBin*(x: BlockInt, len: Positive): string {.noSideEffect.} =
     else:
       result[j] = '0'
 
-when isMainModule:
-  echo "HEAD BITS WITH LEADING ONES"
-  for bit in BLOCK_HEADS_BITS:
-    echo bit.toBin(64)
-  echo "HEAD BITS WITH TAIL ONES"
-  for bit in BLOCK_TAILS_BITS:
-    echo bit.toBin(64)
+# when isMainModule:
+#   echo "HEAD BITS WITH LEADING ONES"
+#   for bit in BLOCK_HEADS_BITS:
+#     echo bit.toBin(64)
+#   echo "HEAD BITS WITH TAIL ONES"
+#   for bit in BLOCK_TAILS_BITS:
+#     echo bit.toBin(64)

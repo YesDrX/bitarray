@@ -55,8 +55,8 @@ proc get_bit_position*(loc: int): (int, int)=
   ##        (block location: int, location inside the block: int)
   ## 
   var
-    block_loc = loc div BLOCK_LEN
-    in_block_loc = loc mod BLOCK_LEN
+    block_loc = loc.shr(BLOCK_LEN_POWER_2)
+    in_block_loc = block_loc.shl(BLOCK_LEN_POWER_2).bitxor(loc)
   result = (block_loc, in_block_loc)
 
 proc setBit*(bit_arr: BitsArray, loc: int) =
@@ -108,7 +108,7 @@ proc `&`*(a, b: BitsArray): BitsArray =
   assert( a.len == b.len)
 
   result = newBitsArray(a.len)
-  for i in 0 ..< a.blocks:
+  for i in 0 || (a.blocks-1):
     result.bits[i] = bitand(a.bits[i], b.bits[i])
 
 proc `|`*(a, b: BitsArray): BitsArray =
@@ -117,21 +117,21 @@ proc `|`*(a, b: BitsArray): BitsArray =
   assert( a.len == b.len)
 
   result = newBitsArray(a.len)
-  for i in 0 ..< a.blocks:
+  for i in 0 || (a.blocks-1):
     result.bits[i] = bitor(a.bits[i], b.bits[i])
 
 proc `~`*(a: BitsArray): BitsArray =
   ## Computes the bitwise not of a.
   ## 
   result = newBitsArray(a.len)
-  for i in 0 ..< a.blocks:
+  for i in 0 || (a.blocks-1):
     result.bits[i] = bitnot(a.bits[i])
 
 proc `^`*(a,b : BitsArray): BitsArray =
   ## Computes the bitwise xor of a and b.
   ## 
   result = newBitsArray(a.len)
-  for i in 0 ..< a.blocks:
+  for i in 0 || (a.blocks-1):
     result.bits[i] = bitxor(a.bits[i], b.bits[i])
 
 proc `[]`*(a: BitsArray, loc: int): bool=
@@ -206,32 +206,32 @@ proc copy*(a: BitsArray): BitsArray=
   ## Make a new copy of BitsArray (different memory locations).
   ## 
   result = newBitsArray(a.len)
-  for i in 0 ..< a.blocks:
+  for i in 0 || (a.blocks-1):
     result.bits[i] = a.bits[i]
 
 proc swap*(a, b: BitsArray) =
   ## Swap a and b.
   assert(a.len == b.len)
 
-  for i in 0 ..< a.blocks:
+  for i in 0 || (a.blocks-1):
     swap(a.bits[i], b.bits[i])
 
 proc setAll*(a: BitsArray) =
   ## Set all bits to be 1.
   ## 
-  for i in 0 ..< a.blocks:
+  for i in 0 || (a.blocks-1):
     a.bits[i] = BlockInt.high
 
 proc clearAll*(a: BitsArray) =
   ## Set all bits to be 0.
   ## 
-  for i in 0 ..< a.blocks:
+  for i in 0 || (a.blocks-1):
     a.bits[i] = BlockInt.low
 
 proc flipAll*(a: BitsArray) =
   ## Flip all bits.
   ## 
-  for i in 0 ..< a.blocks:
+  for i in 0 || (a.blocks-1):
     a.bits[i] = bitnot(a.bits[i])
 
 proc sum*(a: BitsArray): int=
@@ -335,8 +335,8 @@ proc expand*(a: BitsArray, len: int) =
   ## 
   assert(len >= a.len)
   let
-    extra_bits = len - a.len
-    existing_blocks = a.blocks
+    # extra_bits = len - a.len
+    # existing_blocks = a.blocks
     wasted_bits = a.len mod BLOCK_LEN
   a.bits[a.blocks-1] = a.bits[a.blocks-1].bitand(BLOCK_HEADS_BITS[BLOCK_LEN - wasted_bits])
   a.len = len
@@ -360,7 +360,7 @@ proc concat*(a, b: BitsArray): BitsArray=
   else:
     var
       wasted_bits_a = if a.len mod BLOCK_LEN > 0 : (a.len mod BLOCK_LEN) else: 0
-      wasted_bits_b = if b.len mod BLOCK_LEN > 0 : (b.len mod BLOCK_LEN) else: 0
+      # wasted_bits_b = if b.len mod BLOCK_LEN > 0 : (b.len mod BLOCK_LEN) else: 0
     result = newBitsArray(a.len + b.len)
     if  wasted_bits_a > 0:
       var
@@ -369,16 +369,16 @@ proc concat*(a, b: BitsArray): BitsArray=
       head_b.len = BLOCK_LEN
       head_b.bits[0] = head_b.bits[0].bitand(BLOCK_HEADS_BITS[a.len mod BLOCK_LEN])
       head_b = head_b.shr(a.len mod BLOCK_LEN)
-      for i in 0 ..< a.blocks:
+      for i in 0 || (a.blocks-1):
         result.bits[i] = a.bits[i]
       result.bits[a.blocks-1] = result.bits[a.blocks-1].bitand(BLOCK_HEADS_BITS[a.len mod BLOCK_LEN])
       result.bits[a.blocks-1] = result.bits[a.blocks-1].bitor(head_b.bits[0])
-      for i in a.blocks ..< result.blocks:
+      for i in a.blocks || (result.blocks-1):
         result.bits[i] = shifted_b.bits[i - a.blocks]
     else:
-      for i in 0 ..< a.blocks:
+      for i in 0 || (a.blocks-1):
         result.bits[i] = a.bits[i]
-      for i in a.blocks ..< result.blocks:
+      for i in a.blocks || (result.blocks-1):
         result.bits[i] = b.bits[i - a.blocks]
 
 proc toBitsArray*[T: not string](a: T): BitsArray=
@@ -418,13 +418,16 @@ proc toBitsArray*(a: string): BitsArray=
 
 proc binToBitsArray*(a: string): BitsArray=
   ## Convert a binary representation string to BitsArray
+  ## '0' for low bit, '1' and other non-'0' for high bit
   ##
+
   runnableExamples:
     doAssert "010101".binToBitsArray.`$` == "010101"
+    doAssert "01010a".binToBitsArray.`$` == "010101"
 
   result = newBitsArray(a.len)
   for i in 0 ..< a.len:
-    if a[i] == '1': result.setBits(i)
+    if a[i] != '0': result.setBits(i)
 
 proc reverseBits*(a: BitsArray): BitsArray=
   ## Return the bit reversal of a.
@@ -441,8 +444,11 @@ proc reverseBits*(a: BitsArray): BitsArray=
     shifted_a = a.shr(wasted_bits)
   else:
     shallowCopy(shifted_a, a)
-  for i in a.blocks-1 .. 0:
+  for i in (a.blocks-1) || 0:
     result.bits[i - a.blocks + 1] = shifted_a.bits[i].reverseBits
+
+proc version*(): string=
+  return "0.2.0"
 
 when isMainModule:
   var
@@ -452,9 +458,12 @@ when isMainModule:
   echo "    a = ",a
   echo "    b = ",b
   echo "set bits ..."
+
   a.setBits(0,1,2,3,4,69)
   b.setBits(6,7,8,9,65)
+  echo "set [0,1,2,3,4,69]-th bit of a"
   echo "    a = ",a
+  echo "set [6,7,8,9,65]-th bit of a"
   echo "    b = ",b
   echo "a & b = ", a & b
   echo "a | b = ", a | b
@@ -468,6 +477,10 @@ when isMainModule:
   echo "a.shr(2) =",a.shr(2)
   echo "a.shr(3) =",a.shr(3)
   echo "a.shr(69)=",a.shr(69)
-
   a.expand(100)
-  echo a
+  echo "expand a to 100 bits: ", a
+  echo "127.uint32.toBitsArray = ", 127.uint32.toBitsArray.`$`
+  echo "127.uint32.toBitsArray.reverseBits = ", 127.uint32.toBitsArray.reverseBits.`$`
+  echo "127.uint32.toBitsArray.reverseBits.reverseBits = ", 127.uint32.toBitsArray.reverseBits.reverseBits.`$`
+  echo "(uint32.high-3).toBitsArray = ", (uint32.high.uint32-3.uint32).toBitsArray.`$`
+  echo "(uint32.high-3).toBitsArray.reverseBits = ", (uint32.high.uint32-3.uint32).toBitsArray.reverseBits.`$`

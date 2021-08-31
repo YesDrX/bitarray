@@ -1,4 +1,5 @@
 BlockInt	bitarray/utils.html#BlockInt	utils: BlockInt	
+BLOCK_LEN_POWER_2	bitarray/utils.html#BLOCK_LEN_POWER_2	utils: BLOCK_LEN_POWER_2	
 BLOCK_LEN	bitarray/utils.html#BLOCK_LEN	utils: BLOCK_LEN	
 BLOCK_HEADS_BITS	bitarray/utils.html#BLOCK_HEADS_BITS	utils: BLOCK_HEADS_BITS	
 BLOCK_TAILS_BITS	bitarray/utils.html#BLOCK_TAILS_BITS	utils: BLOCK_TAILS_BITS	

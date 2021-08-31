@@ -460,7 +460,7 @@ proc reverseBits*(a: BitsArray): BitsArray=
     result.bits[i - a.blocks + 1] = shifted_a.bits[i].reverseBits
 
 proc version*(): string=
-  return "0.2.0"
+  return "0.2.1"
 
 when isMainModule:
   var

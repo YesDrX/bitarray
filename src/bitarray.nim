@@ -22,7 +22,7 @@ export bitops, strutils, utils
 ## 
 ## 
 type
-  BitsArray* = ref object
+  BitsArray* = ref object of RootObj
     bits*: seq[BlockInt]
     len*: int
 
@@ -91,6 +91,7 @@ proc testBit*(bit_arr: BitsArray, loc: int): bool =
   ## 
   var
     (block_loc, in_block_loc) = loc.get_bit_position
+  # echo "###########", (block_loc, in_block_loc)
   testBit(bit_arr.bits[block_loc], in_block_loc)
 
 proc countSetBits*(bit_arr: BitsArray): int =
@@ -167,14 +168,10 @@ proc `[]`*(a: BitsArray, locs: HSlice): BitsArray=
     r = if (locs.b is BackwardsIndex): -locs.b.int else: locs.b.int
   if r < 0: r = a.len + r
   if l < 0: l = a.len + l
-
   result = newBitsArray(r - l + 1)
-  var
-    i = 0
   for loc in l .. r:
     if a.testBit(loc):
-      result.setBit(i)
-    i += 1
+      result.setBit(loc-l)
 
 proc `[]=`*(a: BitsArray, loc: int, value: bool) =
   ## Assign bit at loc to value.

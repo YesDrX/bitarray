@@ -12,7 +12,7 @@ nimble install
 ```
 or
 ```
-nimble install nim-bitarray
+nimble install nimbitarray
 ```
 
 # [Documentation](https://yesdrx.github.io/bitarray/)

@@ -111,6 +111,9 @@ proc `&`*(a, b: BitsArray): BitsArray =
   for i in 0 || (a.blocks-1):
     result.bits[i] = bitand(a.bits[i], b.bits[i])
 
+template bitand*(a, b: BitsArray): BitsArray =
+  a & b
+
 proc `|`*(a, b: BitsArray): BitsArray =
   ## Computes the bitwise or of a and b.
   ## 
@@ -120,6 +123,9 @@ proc `|`*(a, b: BitsArray): BitsArray =
   for i in 0 || (a.blocks-1):
     result.bits[i] = bitor(a.bits[i], b.bits[i])
 
+template bitor*(a, b: BitsArray): BitsArray =
+  a | b
+
 proc `~`*(a: BitsArray): BitsArray =
   ## Computes the bitwise not of a.
   ## 
@@ -127,12 +133,18 @@ proc `~`*(a: BitsArray): BitsArray =
   for i in 0 || (a.blocks-1):
     result.bits[i] = bitnot(a.bits[i])
 
+template bitnot*(a: BitsArray): BitsArray =
+  ~a
+
 proc `^`*(a,b : BitsArray): BitsArray =
   ## Computes the bitwise xor of a and b.
   ## 
   result = newBitsArray(a.len)
   for i in 0 || (a.blocks-1):
     result.bits[i] = bitxor(a.bits[i], b.bits[i])
+
+template bitxor*(a,b : BitsArray): BitsArray =
+  a ^ b
 
 proc `[]`*(a: BitsArray, loc: int): bool=
   ## Test bit value at loc.
@@ -468,6 +480,7 @@ when isMainModule:
   echo "a & b = ", a & b
   echo "a | b = ", a | b
   echo "a ^ b = ", a ^ b
+  echo "a bitxor b = ", a.bitxor(b)
   echo "   ~a = ", ~a
   echo "a.shl(1) =",a.shl(1)
   echo "a.shl(2) =",a.shl(2)

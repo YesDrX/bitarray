@@ -1,20 +1,16 @@
 import bitops
 
+type BlockInt* = uint
 when int.sizeof == 16:
   # maybe in the future, we can have 128-bit cpu.
-  type BlockInt* = uint128
   const BLOCK_LEN_POWER_2* = 7
 elif int.sizeof == 8:
-  type BlockInt* = uint64
   const BLOCK_LEN_POWER_2* = 6
 elif int.sizeof == 4:
-  type BlockInt* = uint32
   const BLOCK_LEN_POWER_2* = 5
 elif int.sizeof == 2:
-  type BlockInt* = uint16
   const BLOCK_LEN_POWER_2* = 4
 elif int.sizeof == 1:
-  type BlockInt* = uint8
   const BLOCK_LEN_POWER_2* = 3
 else:
   quit "what kind of cpu you have?"
@@ -39,28 +35,17 @@ var
 BLOCK_HEADS_BITS[BLOCK_LEN] = BlockInt.high
 BLOCK_TAILS_BITS[BLOCK_LEN] = BlockInt.high
 for i in countdown(BLOCK_LEN-1, 0, 1):
-  BLOCK_HEADS_BITS[i] = BLOCK_HEADS_BITS[i + 1].shr(1)
-  BLOCK_TAILS_BITS[i] = BLOCK_TAILS_BITS[i + 1].shl(1)
+  BLOCK_HEADS_BITS[i] = BLOCK_HEADS_BITS[i + 1].shl(1)
+  BLOCK_TAILS_BITS[i] = BLOCK_TAILS_BITS[i + 1].shr(1)
 
-proc toBin*(x: BlockInt, len: Positive): string {.noSideEffect.} =
+proc toBin*(x: BlockInt): string {.noSideEffect.} =
   ## Converts `x` (BlockInt) into its binary representation.
   ##
   ## The resulting string is always `len` characters long. No leading ``0b``
   ## prefix is generated.
   ## 
-  var
-    mask = BlockInt 0
-    tmp : BlockInt
-
-  assert(len > 0)
-  result = newString(len)
-  for j in countdown(len-1, 0):
-    mask.setBit(j)
-    tmp = mask.bitand(x)
-    if tmp.testBit(j):
-      result[j] = '1'
-    else:
-      result[j] = '0'
+  for j in countdown(BLOCK_LEN-1, 0):
+    result = result & (if testBit(x,j): "1" else: "0")
 
 # when isMainModule:
 #   echo "HEAD BITS WITH LEADING ONES"

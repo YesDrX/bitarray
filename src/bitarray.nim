@@ -43,11 +43,11 @@ proc `$`*(bit_arr: BitsArray): string=
   result = ""
   if bit_arr.len mod BLOCK_LEN == 0:
     for i in 0 ..< bit_arr.blocks:
-      result &= bit_arr.bits[i].toBin(BLOCK_LEN)
+      result &= bit_arr.bits[i].toBin
   else:
     for i in 0 ..< (bit_arr.blocks - 1):
-      result &= bit_arr.bits[i].toBin(BLOCK_LEN)
-    result &= bit_arr.bits[bit_arr.blocks-1].toBin(BLOCK_LEN)[0 .. (bit_arr.len mod BLOCK_LEN - 1)]
+      result &= bit_arr.bits[i].toBin
+    result &= bit_arr.bits[bit_arr.blocks-1].toBin[0 .. (bit_arr.len mod BLOCK_LEN - 1)]
 
 proc get_bit_position*(loc: int): (int, int)=
   ## Given a bit location (0<=loc<=len)
@@ -66,7 +66,7 @@ proc setBit*(bit_arr: BitsArray, loc: int) =
   ## 
   var
     (block_loc, in_block_loc) = loc.get_bit_position
-  setBit(bit_arr.bits[block_loc], in_block_loc)
+  setBit(bit_arr.bits[block_loc], BLOCK_LEN - in_block_loc-1)
 
 proc clearBit*(bit_arr: BitsArray, loc: int) =
   ## Set bit value at location loc to be 0.
@@ -75,7 +75,7 @@ proc clearBit*(bit_arr: BitsArray, loc: int) =
   ## 
   var
     (block_loc, in_block_loc) = loc.get_bit_position
-  clearBit(bit_arr.bits[block_loc], in_block_loc)
+  clearBit(bit_arr.bits[block_loc], BLOCK_LEN-in_block_loc-1)
 
 proc flipBit*(bit_arr: BitsArray, loc: int) =
   ## Flip bit value at location loc.
@@ -84,15 +84,14 @@ proc flipBit*(bit_arr: BitsArray, loc: int) =
   ## 
   var
     (block_loc, in_block_loc) = loc.get_bit_position
-  flipBit(bit_arr.bits[block_loc], in_block_loc)
+  flipBit(bit_arr.bits[block_loc], BLOCK_LEN-in_block_loc-1)
 
 proc testBit*(bit_arr: BitsArray, loc: int): bool =
   ## Check whether bit value at location loc is equal to 1.
   ## 
   var
     (block_loc, in_block_loc) = loc.get_bit_position
-  # echo "###########", (block_loc, in_block_loc)
-  testBit(bit_arr.bits[block_loc], in_block_loc)
+  testBit(bit_arr.bits[block_loc], BLOCK_LEN-in_block_loc-1)
 
 proc countSetBits*(bit_arr: BitsArray): int =
   ## Counts the set bits in integer. (also called Hamming weight.)
@@ -169,7 +168,7 @@ proc `[]`*(a: BitsArray, locs: HSlice): BitsArray=
   if r < 0: r = a.len + r
   if l < 0: l = a.len + l
   result = newBitsArray(r - l + 1)
-  for loc in l .. r:
+  for loc in l || r:
     if a.testBit(loc):
       result.setBit(loc-l)
 
@@ -268,15 +267,16 @@ proc `shl`*(a: BitsArray, steps: SomeInteger): BitsArray=
     blocks_to_abandon = steps div BLOCK_LEN
     blocks_to_keep = a.blocks - blocks_to_abandon
     shifts_in_block = steps mod BLOCK_LEN
-    block_idx: int
-    left_shifted: BlockInt = 0.BlockInt
 
-  for i in countdown(blocks_to_keep-1,0):
-    block_idx = i + blocks_to_abandon
-    result.bits[i] = a.bits[block_idx].shr(shifts_in_block)
-    if i > 0:
-      result.bits[i] = result.bits[i].bitor(left_shifted)
-    left_shifted = a.bits[block_idx].bitand(BLOCK_HEADS_BITS[shifts_in_block])
+  for i in 1 .. blocks_to_keep:
+    result.bits[i-1] = a.bits[i+blocks_to_abandon]
+  if shifts_in_block > 0:
+    for i in 1 .. blocks_to_keep:
+      result.bits[i-1] = result.bits[i-1].shl(shifts_in_block)
+      if i < blocks_to_keep:
+        result.bits[i-1] = result.bits[i-1].bitxor(result.bits[i].shr(BLOCK_LEN-shifts_in_block))
+      else:
+        result.bits[i-1] = result.bits[i-1].bitxor(BlockInt.low)
 
 proc `shr`*(a: BitsArray, steps: SomeInteger): BitsArray=
   ## Return a new BitsArray, where bits are shifted right by steps.
@@ -292,15 +292,16 @@ proc `shr`*(a: BitsArray, steps: SomeInteger): BitsArray=
     blocks_to_abandon = steps div BLOCK_LEN
     blocks_to_keep = a.blocks - blocks_to_abandon
     shifts_in_block = steps mod BLOCK_LEN
-    block_idx: int
-    right_shifted: BlockInt = 0.BlockInt
   
-  for i in 0 ..< blocks_to_keep:
-    block_idx = a.blocks - (i + blocks_to_abandon) - 1
-    result.bits[a.blocks - i - 1] = a.bits[block_idx].shl(shifts_in_block)
-    if i > 0:
-      result.bits[a.blocks - i - 1] = result.bits[a.blocks - i - 1].bitor(right_shifted)
-    right_shifted = a.bits[block_idx].bitand(BLOCK_TAILS_BITS[shifts_in_block])
+  for i in 1 .. blocks_to_keep:
+    result.bits[result.blocks - i] = a.bits[a.blocks - i - blocks_to_abandon]
+  if shifts_in_block > 0:
+    for i in 1 .. blocks_to_keep:
+      result.bits[result.blocks - i] = result.bits[result.blocks - i].shr(shifts_in_block)
+      if result.blocks - i - 1 >= 0:
+        result.bits[result.blocks - i] = result.bits[result.blocks - i].bitxor(result.bits[result.blocks - i - 1].shl(BLOCK_LEN - shifts_in_block))
+      else:
+        result.bits[result.blocks - i] = result.bits[result.blocks - i].bitxor(BlockInt.low)
 
 proc firstSetBit*(a: BitsArray): int=
   ## Return first location of first bit of value 1. If no bit is of value 1, -1 is returned.
@@ -346,7 +347,10 @@ proc expand*(a: BitsArray, len: int) =
   let
     # extra_bits = len - a.len
     # existing_blocks = a.blocks
-    wasted_bits = a.len mod BLOCK_LEN
+    wasted_bits = if a.len mod BLOCK_LEN != 0: BLOCK_LEN - (a.len mod BLOCK_LEN) else: 0
+  # echo a.bits[a.blocks-1]
+  # echo BLOCK_HEADS_BITS[BLOCK_LEN - wasted_bits]
+  # echo (a.bits[a.blocks-1]).bitand(BLOCK_HEADS_BITS[BLOCK_LEN - wasted_bits])
   a.bits[a.blocks-1] = a.bits[a.blocks-1].bitand(BLOCK_HEADS_BITS[BLOCK_LEN - wasted_bits])
   a.len = len
   let
@@ -368,7 +372,7 @@ proc concat*(a, b: BitsArray): BitsArray=
     return a.copy
   else:
     var
-      wasted_bits_a = if a.len mod BLOCK_LEN > 0 : (a.len mod BLOCK_LEN) else: 0
+      wasted_bits_a = if a.len mod BLOCK_LEN > 0 : (BLOCK_LEN - (a.len mod BLOCK_LEN)) else: 0
       # wasted_bits_b = if b.len mod BLOCK_LEN > 0 : (b.len mod BLOCK_LEN) else: 0
     result = newBitsArray(a.len + b.len)
     if  wasted_bits_a > 0:

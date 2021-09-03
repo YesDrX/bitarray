@@ -32,8 +32,8 @@ proc slowSub*(a, b: string): string=
             else:
                 borrow = 0
             result = digit.`$` & result
-        result = result.strip(leading=true,trailing=false,chars={'0'})
-        if result.len==0: result = "0"
+        result = result.strip(chars={'0'}, trailing=false)
+        if result.len == 0: result = "0"    
 
 proc slowAdd*(a, b: string): string=
     if a.startswith("-") and b.startswith("-"):
@@ -48,6 +48,7 @@ proc slowAdd*(a, b: string): string=
             b_len = b.len
             carry = 0
             digit_a, digit_b, digit : int
+        
         for i in 1 .. max(a_len, b_len):
             digit_a = if a_len >= i: int(a[a_len - i])-48 else: 0
             digit_b = if b_len >= i: int(b[b_len - i])-48 else: 0
@@ -56,14 +57,16 @@ proc slowAdd*(a, b: string): string=
             digit = digit mod 10
             result = digit.`$` & result
         if carry != 0: result = carry.`$` & result
+        result = result.strip(chars={'0'}, trailing=false)
+        if result.len == 0: result = "0"
 
 proc slowMultiply*(a, b : string): string=
     if a.startswith("-") and b.startswith("-"):
         return slowMultiply(a[1..(a.len-1)],b[1..(b.len-1)])
     elif a.startswith("-"):
-        return slowMultiply(a[1..(a.len-1)],b)
+        return "-" & slowMultiply(a[1..(a.len-1)],b)
     elif b.startswith("-"):
-        return slowMultiply(a,b[1..(b.len-1)])
+        return "-" & slowMultiply(a,b[1..(b.len-1)])
     else:
         var
             a_len = a.len
@@ -139,10 +142,7 @@ proc slowDivide*(a, b: string, digits: int): string=
             remainder = c[0 .. idx]
         else:
             remainder = c[0 .. idx]
-            if idx < b.len-1:
-                idx += 1
-            else:
-                digits_left = false
+            digits_left = false
 
         while true:
             if remainder == "0": break
@@ -160,8 +160,8 @@ proc slowDivide*(a, b: string, digits: int): string=
                     decimals += 1
                     if flag > 1:
                         result &= "0"
-            
-            # echo "remainder=",remainder,",result=",result,",decimals=",decimals
+            # if decimals <= 5:
+                # echo "remainder=",remainder,",b=",b,",result=",result,",decimals=",decimals
             (quotient, remainder) = getQuotient(remainder, b)
             # echo "quotient=",quotient,",remainder=",remainder
             result &= quotient
@@ -175,10 +175,13 @@ proc blocksToDecimal*(x : seq[uint]): string=
     result = "0"
     for i in 1 .. x.len:
         result = slowAdd(result, slowMultiply(x[x.len-i].`$`, POWER_OF_TWO[(i-1).shl(6)]))
+    
 
 when isMainModule:
-    echo slowDivide("1","3",10)
-    echo slowDivide("4","3",10)
-    echo slowDivide("355","133",10)
-    echo slowDivide("1","100",10)
-    echo slowDivide("4","2",10)
+    # echo slowDivide("1","3",10)
+    # echo slowDivide("4","3",10)
+    # echo slowDivide("355","133",10)
+    # echo slowDivide("1","100",10)
+    # echo slowDivide("4","2",10)
+
+    echo getQuotient("14319451959237480602209391966837419245360869586085326264720724851155532002676452079672642132912314187714679754609499860037198430378536688350222513020782289810256437153989606051133400630739489388122520004115872623737965276803368791807679393553237147648","14319451959237480602209391966837419245360869586085326264720724851155532002676452079672642132912314187714679754609499860037198430378536688350222513020782289810256437153989606051133400630739489388122520004115872623737965276803368791807679393553237147648")
